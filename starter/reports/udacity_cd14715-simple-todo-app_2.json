@@ -1,0 +1,273 @@
+{
+  "pullRequest": {
+    "owner": "udacity",
+    "repo": "cd14715-simple-todo-app",
+    "number": 2
+  },
+  "fileReviews": [
+    {
+      "file": "src/todo.ts",
+      "codeQuality": {
+        "file": "src/todo.ts",
+        "issues": [
+          {
+            "line": 118,
+            "severity": "critical",
+            "category": "security",
+            "description": "SQL injection vulnerability in searchTodos() function. Direct string interpolation embeds user-supplied 'keyword' parameter without escaping or parameterization in LIKE clause, allowing arbitrary SQL injection attacks.",
+            "suggestion": "Use parameterized query with $1 placeholder"
+          },
+          {
+            "line": 128,
+            "severity": "critical",
+            "category": "security",
+            "description": "SQL injection vulnerability in searchTodosByStatus() function. User input directly concatenated into SQL WHERE clause without validation or parameterization, enabling SQL injection attacks.",
+            "suggestion": "Use parameterized query with $1 placeholder"
+          },
+          {
+            "line": 137,
+            "severity": "critical",
+            "category": "security",
+            "description": "SQL injection vulnerability in getTodosByUser() function. Template literal with direct string interpolation embeds 'userId' parameter in SQL JOIN clause without parameterization, enabling SQL injection.",
+            "suggestion": "Use parameterized query with $1 placeholder"
+          },
+          {
+            "line": 128,
+            "severity": "high",
+            "category": "best-practice",
+            "description": "Missing input validation in searchTodosByStatus(). Function accepts 'completed' as string parameter but doesn't validate it's a boolean value.",
+            "suggestion": "Change parameter type to boolean and add validation"
+          },
+          {
+            "line": 118,
+            "severity": "medium",
+            "category": "best-practice",
+            "description": "Missing input validation in searchTodos(). Function doesn't validate keyword length or trim whitespace.",
+            "suggestion": "Add validation similar to validateTodoInput()"
+          },
+          {
+            "line": 137,
+            "severity": "medium",
+            "category": "best-practice",
+            "description": "Missing input validation in getTodosByUser(). Function doesn't validate userId format or length.",
+            "suggestion": "Validate format and add length bounds"
+          }
+        ],
+        "overallScore": 25,
+        "summary": "The file demonstrates secure practices in existing functions (lines 1-114) with proper parameterized queries and input validation. However, three new functions (lines 115-147) completely abandon these security measures and contain critical SQL injection vulnerabilities."
+      },
+      "testCoverage": {
+        "file": "src/todo.ts",
+        "hasTests": false,
+        "testFiles": [],
+        "untestedPaths": [
+          {
+            "type": "function",
+            "location": "Line 115-122, searchTodos()",
+            "priority": "critical",
+            "reasoning": "Contains SQL injection vulnerability via string interpolation. No parameterized query. Zero tests exist.",
+            "suggestedTest": "Test keyword search in title and description fields; test SQL injection attempts"
+          },
+          {
+            "type": "function",
+            "location": "Line 124-131, searchTodosByStatus()",
+            "priority": "critical",
+            "reasoning": "Contains SQL injection vulnerability via string concatenation. No parameterized query. Zero tests exist.",
+            "suggestedTest": "Test filtering by true/false status; test SQL injection attempts"
+          },
+          {
+            "type": "function",
+            "location": "Line 133-140, getTodosByUser()",
+            "priority": "critical",
+            "reasoning": "Contains SQL injection vulnerability via template literal. No parameterized query. Zero tests exist.",
+            "suggestedTest": "Test retrieving todos for specific user; test SQL injection attempts"
+          },
+          {
+            "type": "function",
+            "location": "Line 52-72, createTodo()",
+            "priority": "critical",
+            "reasoning": "Core business logic creating new todos. Multiple execution paths. Zero tests.",
+            "suggestedTest": "Test valid todo creation; test invalid input rejection; verify db.query"
+          },
+          {
+            "type": "function",
+            "location": "Line 24-35, validateTodoInput()",
+            "priority": "high",
+            "reasoning": "Critical validation function with multiple branches. Zero tests.",
+            "suggestedTest": "Test valid input; test empty title; test length boundaries"
+          },
+          {
+            "type": "function",
+            "location": "Line 40-47, sanitizeInput()",
+            "priority": "high",
+            "reasoning": "XSS prevention function. Must test all character replacements.",
+            "suggestedTest": "Test escaping of <, >, double and single quotes"
+          },
+          {
+            "type": "function",
+            "location": "Line 77-81, getAllTodos()",
+            "priority": "high",
+            "reasoning": "Retrieves all todos. Must handle empty results.",
+            "suggestedTest": "Test empty array; test todos in DESC order"
+          },
+          {
+            "type": "function",
+            "location": "Line 86-96, getTodoById()",
+            "priority": "high",
+            "reasoning": "Retrieves single todo with two code paths.",
+            "suggestedTest": "Test returns todo when found; test returns null"
+          },
+          {
+            "type": "function",
+            "location": "Line 101-104, updateTodoStatus()",
+            "priority": "high",
+            "reasoning": "Updates completion status. Must verify parameterized query.",
+            "suggestedTest": "Test updating status to true and false"
+          },
+          {
+            "type": "function",
+            "location": "Line 109-112, deleteTodo()",
+            "priority": "high",
+            "reasoning": "Deletes todo. Must prevent SQL injection.",
+            "suggestedTest": "Test deletes todo with valid ID"
+          },
+          {
+            "type": "function",
+            "location": "Line 145-147, generateId()",
+            "priority": "medium",
+            "reasoning": "ID generation function should produce unique IDs.",
+            "suggestedTest": "Test ID format and uniqueness"
+          }
+        ],
+        "coverageEstimate": 0,
+        "summary": "No test files exist for this module. All 11 functions have zero test coverage."
+      },
+      "refactorings": {
+        "file": "src/todo.ts",
+        "suggestions": [
+          {
+            "type": "pattern-improvement",
+            "location": "Lines 115-147",
+            "impact": "high",
+            "description": "Critical Security Fix - SQL Injection Vulnerabilities. All three new functions use direct string interpolation in SQL queries.",
+            "before": "export async function searchTodos(keyword: string): Promise<Todo[]> {\n  const query = `SELECT * FROM todos WHERE title LIKE '%${keyword}%'`;\n  const rows = await db.query(query);\n  return rows as Todo[];\n}",
+            "after": "export async function searchTodos(keyword: string): Promise<Todo[]> {\n  const query = 'SELECT * FROM todos WHERE title LIKE $1';\n  const rows = await db.query(query, [`%${keyword}%`]);\n  return rows as Todo[];\n}",
+            "benefits": "Eliminates SQL injection vulnerabilities, maintains consistency with existing secure patterns"
+          },
+          {
+            "type": "modernize",
+            "location": "Line 127",
+            "impact": "medium",
+            "description": "Type Safety Improvement - searchTodosByStatus Parameter Type should be boolean not string.",
+            "before": "export async function searchTodosByStatus(completed: string): Promise<Todo[]> {",
+            "after": "export async function searchTodosByStatus(completed: boolean): Promise<Todo[]> {",
+            "benefits": "Enforces compile-time type safety, prevents invalid input"
+          },
+          {
+            "type": "extract-function",
+            "location": "Lines 52-147",
+            "impact": "medium",
+            "description": "Extract Common Query Pattern - Reduce Duplication across all query functions.",
+            "before": "export async function getTodoById(id: string): Promise<Todo | null> {\n  const query = 'SELECT * FROM todos WHERE id = $1';\n  const rows = await db.query(query, [id]);\n  return rows[0] as Todo;\n}",
+            "after": "private async function queryTodos(query: string, params: (string | boolean | Date)[] = []): Promise<Todo[]> {\n  const rows = await db.query(query, params);\n  return rows as Todo[];\n}",
+            "benefits": "Single source of truth for query execution and type casting"
+          },
+          {
+            "type": "simplify",
+            "location": "Lines 115-147",
+            "impact": "medium",
+            "description": "Add Input Validation for Search Functions to prevent empty or oversized parameters.",
+            "before": "export async function searchTodos(keyword: string): Promise<Todo[]> {\n  const query = 'SELECT * FROM todos WHERE title LIKE $1';\n  const rows = await db.query(query, [`%${keyword}%`]);\n  return rows as Todo[];\n}",
+            "after": "function validateSearchInput(keyword: string): boolean {\n  if (!keyword || keyword.trim().length === 0) return false;\n  return keyword.length <= 100;\n}",
+            "benefits": "Prevents empty search queries and ReDoS attacks"
+          },
+          {
+            "type": "modernize",
+            "location": "Lines 24-35",
+            "impact": "low",
+            "description": "Modernize Optional Chaining and Nullish Coalescing syntax.",
+            "before": "if (!input.title || input.title.trim().length === 0)",
+            "after": "const trimmedTitle = input.title?.trim() ?? '';",
+            "benefits": "More concise and readable modern TypeScript syntax"
+          },
+          {
+            "type": "simplify",
+            "location": "Line 145-147",
+            "impact": "low",
+            "description": "Enhanced Documentation for generateId() function.",
+            "before": "function generateId(): string {",
+            "after": "/**\n * Generates a unique ID with timestamp and random component\n */\nfunction generateId(): string {",
+            "benefits": "Documents ID format for future maintainers"
+          }
+        ],
+        "summary": "Six refactoring opportunities identified, with one critical security fix as top priority."
+      }
+    }
+  ],
+  "summary": {
+    "totalFiles": 1,
+    "overallScore": 25,
+    "criticalIssues": 3,
+    "highPriorityTests": 10,
+    "refactoringOpportunities": 6
+  },
+  "recommendations": [
+    {
+      "priority": "critical",
+      "category": "Security Vulnerabilities",
+      "description": "Three SQL injection vulnerabilities must be fixed immediately before merging. All three new functions use direct string interpolation instead of parameterized queries. Convert to parameterized queries with $1, $2 placeholders.",
+      "files": [
+        "src/todo.ts"
+      ]
+    },
+    {
+      "priority": "critical",
+      "category": "Missing Test Coverage",
+      "description": "Zero test coverage exists for this module. Create comprehensive test suite with ~40 unit tests covering input validation, CRUD operations, search functions with security focus, edge cases, and ID generation.",
+      "files": [
+        "src/todo.ts"
+      ]
+    },
+    {
+      "priority": "high",
+      "category": "Type Safety",
+      "description": "Correct the parameter type in searchTodosByStatus() from string to boolean to enforce compile-time type safety.",
+      "files": [
+        "src/todo.ts"
+      ]
+    },
+    {
+      "priority": "high",
+      "category": "Input Validation",
+      "description": "Add input validation guards to all three new search functions similar to validateTodoInput().",
+      "files": [
+        "src/todo.ts"
+      ]
+    },
+    {
+      "priority": "medium",
+      "category": "Code Quality & DRY",
+      "description": "Extract a common query helper function to reduce duplication across all 6 database query functions.",
+      "files": [
+        "src/todo.ts"
+      ]
+    },
+    {
+      "priority": "medium",
+      "category": "Code Style Modernization",
+      "description": "Modernize TypeScript syntax using optional chaining and nullish coalescing operators.",
+      "files": [
+        "src/todo.ts"
+      ]
+    }
+  ],
+  "metadata": {
+    "analyzedAt": "2026-11-18T00:00:00Z",
+    "duration": 254482,
+    "agentVersions": {
+      "code-quality-analyzer": "1.0.0",
+      "test-coverage-analyzer": "1.0.0",
+      "refactoring-suggester": "1.0.0"
+    }
+  }
+}

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Code Review Report</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 24px;
+      background: #f8f9fa;
+      color: #212529;
+    }
+    h1 { color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 12px; }
+    .summary {
+      background: white;
+      padding: 24px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin: 24px 0;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 16px;
+    }
+    .metric { text-align: center; }
+    .metric-value { font-size: 2em; font-weight: bold; color: #3498db; }
+    .metric-label { color: #6c757d; font-size: 0.9em; }
+    ul { list-style: none; padding: 0; }
+    li { padding: 12px; margin: 8px 0; border-radius: 4px; background: white; }
+    .rec-critical { border-left: 4px solid #e74c3c; }
+    .rec-high { border-left: 4px solid #f39c12; }
+    .rec-medium { border-left: 4px solid #3498db; }
+    .rec-low { border-left: 4px solid #27ae60; }
+    .priority { font-weight: bold; margin-right: 8px; }
+    .rec-critical .priority { color: #e74c3c; }
+    .rec-high .priority { color: #f39c12; }
+    .rec-medium .priority { color: #3498db; }
+    .rec-low .priority { color: #27ae60; }
+    footer { text-align: center; color: #6c757d; margin-top: 32px; font-size: 0.9em; }
+  </style>
+</head>
+<body>
+  <h1>🔍 Code Review Report</h1>
+  
+  <div class="summary">
+    <div class="metric">
+      <div class="metric-value">78</div>
+      <div class="metric-label">Overall Score</div>
+    </div>
+    <div class="metric">
+      <div class="metric-value">1</div>
+      <div class="metric-label">Files Reviewed</div>
+    </div>
+    <div class="metric">
+      <div class="metric-value">0</div>
+      <div class="metric-label">Critical Issues</div>
+    </div>
+    <div class="metric">
+      <div class="metric-value">7</div>
+      <div class="metric-label">Tests Needed</div>
+    </div>
+    <div class="metric">
+      <div class="metric-value">8</div>
+      <div class="metric-label">Refactorings</div>
+    </div>
+  </div>
+
+  <h2>🎯 Top Recommendations</h2>
+  <ul>
+      <li class="rec-critical">
+        <span class="priority">[CRITICAL]</span>
+        <strong>Testing</strong>: Implement comprehensive test suite for all 6 functions in fixtures/clean-code.ts. Zero test coverage is unacceptable for a fixture file representing clean code standards. Focus on: createUser business logic (critical), isValidEmail and sanitizeInput edge cases (high), generateId and saveUser private functions (medium).
+        <br><small>Files: fixtures/clean-code.ts</small>
+      </li>
+    
+      <li class="rec-high">
+        <span class="priority">[HIGH]</span>
+        <strong>Security</strong>: Replace custom HTML sanitization with a production-grade library (sanitize-html, DOMPurify, or xss package). Current implementation at line 36 is incomplete and may miss XSS vectors like event handlers and Unicode escapes.
+        <br><small>Files: fixtures/clean-code.ts</small>
+      </li>
+    
+      <li class="rec-high">
+        <span class="priority">[HIGH]</span>
+        <strong>Security</strong>: Replace custom email validation regex with RFC 5322 compliant validation. Use a library like 'email-validator' or 'validator.js' or implement a more comprehensive regex. Current regex at line 29 may accept invalid formats and reject valid ones.
+        <br><small>Files: fixtures/clean-code.ts</small>
+      </li>
+    
+      <li class="rec-high">
+        <span class="priority">[HIGH]</span>
+        <strong>Code Quality</strong>: Implement structured error handling. Create custom ValidationError and other error classes instead of generic Error objects. This enables granular error handling for clients and better debugging information for logging.
+        <br><small>Files: fixtures/clean-code.ts</small>
+      </li>
+    
+      <li class="rec-medium">
+        <span class="priority">[MEDIUM]</span>
+        <strong>Performance</strong>: Extract email regex to module-level constant (line 29). Current implementation recreates the regex on every isValidEmail call, adding unnecessary memory overhead. Move to: const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        <br><small>Files: fixtures/clean-code.ts</small>
+      </li>
+    </ul>
+
+  <footer>
+    Generated at 2026-11-18T00:00:00Z • Duration: 130742ms
+  </footer>
+</body>
+</html>
